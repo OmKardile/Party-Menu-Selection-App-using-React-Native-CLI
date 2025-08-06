@@ -25,6 +25,7 @@ export type Dish = {
   name: string;
   description: string;
   image: string | null;
+   veg: boolean;
   categoryId: number;
   mealType: 'STARTER' | 'MAIN COURSE' | 'DESSERT' | 'SIDES' | string;
   type: 'VEG' | 'NON_VEG' | string;

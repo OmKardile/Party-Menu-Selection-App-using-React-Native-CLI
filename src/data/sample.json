@@ -3,7 +3,8 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
-"description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
+"veg": true,
+"description": "Paneer cubes in KADHAI gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
 "id": 1,
@@ -22,8 +23,9 @@
 {
 "categoryId": 1,
 "mealType": "MAIN COURSE",
-"type": "VEG",
-"description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
+"type": "NON-VEG",
+"veg": false,
+"description": "Chicken in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
 "id": 1,
@@ -37,12 +39,13 @@
 "nameHi": "",
 "nameBn": "",
 "id": 2,
-"name": "Kadhai Paneer 2"
+"name": "Butter Chicken 2"
 },
 {
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -63,6 +66,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -83,6 +87,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -103,6 +108,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -123,6 +129,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -143,6 +150,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -163,6 +171,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -183,6 +192,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -203,6 +213,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -223,6 +234,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -243,6 +255,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -263,6 +276,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -283,6 +297,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -303,6 +318,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -323,6 +339,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -343,6 +360,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -363,6 +381,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -383,6 +402,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -403,6 +423,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -423,6 +444,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -443,6 +465,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -463,6 +486,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -483,6 +507,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -503,6 +528,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -523,6 +549,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -543,6 +570,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -563,6 +591,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
@@ -583,6 +612,7 @@
 "categoryId": 1,
 "mealType": "MAIN COURSE",
 "type": "VEG",
+"veg": true,
 "description": "Paneer cubes in spicy onion gravy with onions and capsicum cubes.",
 "image": null,
 "category": {
