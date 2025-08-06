@@ -1,4 +1,10 @@
+import { Dish } from '../types/dish';
+
 export type RootStackParamList = {
-  Menu: undefined;
-  Summary: { selected: string[] };
+  MenuScreen: undefined;
+  IngredientScreen: { dish: Dish };
+  SummaryScreen: {
+    selectedDishes: Dish[];
+    cartQuantities: { [id: number]: number };
+  };
 };

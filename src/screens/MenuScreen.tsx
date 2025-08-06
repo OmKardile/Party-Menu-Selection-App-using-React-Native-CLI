@@ -1,155 +1,220 @@
-import React, { useState } from 'react';
+// src/screens/MenuScreen.tsx
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
   TextInput,
   FlatList,
   TouchableOpacity,
+  Image,
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import DishCard from '../components/DishCard';
-import { Dish } from '../types/Dish';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App';
+import { Dish } from '../types/dish';
+import { RootStackParamList } from '../navigation/types';
+import sampleData from '../data/sample.json';
 
-const DISHES: Dish[] = [
-  {
-    id: '1',
-    name: 'Spring Rolls',
-    description: 'Crispy rolls with veggies',
-    image: 'https://via.placeholder.com/100',
-    isVeg: true,
-    ingredients: ['Cabbage', 'Carrot', 'Flour'],
-    category: 'Starter',
-  },
-  {
-    id: '2',
-    name: 'Butter Chicken',
-    description: 'Creamy spiced chicken',
-    image: 'https://via.placeholder.com/100',
-    isVeg: false,
-    ingredients: ['Chicken', 'Butter', 'Cream'],
-    category: 'Main Course',
-  },
-  // Add more dishes...
-];
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MenuScreen'>;
 
-const TABS = ['Starter', 'Main Course', 'Dessert', 'Sides'] as Dish['category'][];
+const FILTERS = ['STARTER', 'MAIN COURSE', 'DESSERT', 'SIDES'];
 
 const MenuScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [selectedTab, setSelectedTab] = useState<Dish['category']>('Starter');
+  const navigation = useNavigation<NavigationProp>();
+
   const [search, setSearch] = useState('');
-  const [onlyVeg, setOnlyVeg] = useState(false);
-  const [selected, setSelected] = useState<{ [id: string]: Dish }>({});
+  const [selectedType, setSelectedType] = useState<'VEG' | 'NON_VEG' | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [cartQuantities, setCartQuantities] = useState<{ [id: number]: number }>({});
 
-  const filteredDishes = DISHES.filter(
-    dish =>
-      dish.category === selectedTab &&
-      dish.name.toLowerCase().includes(search.toLowerCase()) &&
-      (!onlyVeg || dish.isVeg)
-  );
+  const dishes: Dish[] = sampleData.map((item) => ({
+    ...item,
+    image: item.image ?? 'https://via.placeholder.com/100', // Fallback
+    type: item.type === 'VEG' ? 'VEG' : 'NON_VEG',
+    mealType: item.mealType as Dish['mealType'],
+  }));
 
-  const handleAdd = (dish: Dish) => {
-    setSelected(prev => ({ ...prev, [dish.id]: dish }));
+  const filteredDishes = useMemo(() => {
+    return dishes.filter((dish) => {
+      const matchSearch = dish.name.toLowerCase().includes(search.toLowerCase());
+      const matchType = selectedType ? dish.type === selectedType : true;
+      const matchCategory = selectedFilter ? dish.mealType === selectedFilter : true;
+      return matchSearch && matchType && matchCategory;
+    });
+  }, [search, selectedType, selectedFilter]);
+
+  const handleAdd = (dishId: number) => {
+    setCartQuantities((prev) => ({
+      ...prev,
+      [dishId]: (prev[dishId] || 0) + 1,
+    }));
   };
 
-  const handleRemove = (dish: Dish) => {
-    const newSelected = { ...selected };
-    delete newSelected[dish.id];
-    setSelected(newSelected);
+  const handleRemove = (dishId: number) => {
+    setCartQuantities((prev) => {
+      if (!prev[dishId]) return prev;
+      const updated = { ...prev };
+      updated[dishId] -= 1;
+      if (updated[dishId] <= 0) delete updated[dishId];
+      return updated;
+    });
+  };
+
+  const handleContinue = () => {
+    const selectedDishes = dishes.filter((dish) => cartQuantities[dish.id]);
+    navigation.navigate('SummaryScreen', {
+      selectedDishes,
+      cartQuantities,
+    });
   };
 
   return (
-    <View style={{ flex: 1, paddingTop: 40 }}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabs}
-      >
-        {TABS.map(tab => (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search dishes..."
+        value={search}
+        onChangeText={setSearch}
+      />
+
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[styles.toggleButton, selectedType === 'VEG' && styles.vegButton]}
+          onPress={() => setSelectedType(selectedType === 'VEG' ? null : 'VEG')}
+        >
+          <Text style={{ color: 'green' }}>🟢 Veg</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.toggleButton, selectedType === 'NON_VEG' && styles.nonVegButton]}
+          onPress={() => setSelectedType(selectedType === 'NON_VEG' ? null : 'NON_VEG')}
+        >
+          <Text style={{ color: 'red' }}>🔴 Non-Veg</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView horizontal contentContainerStyle={styles.filterRow}>
+        {FILTERS.map((filter) => (
           <TouchableOpacity
-            key={tab}
-            onPress={() => setSelectedTab(tab)}
-            style={styles.tab}
+            key={filter}
+            style={[
+              styles.filterButton,
+              selectedFilter === filter && styles.selectedFilterButton,
+            ]}
+            onPress={() => setSelectedFilter(selectedFilter === filter ? null : filter)}
           >
-            <Text
-              style={[styles.tabText, selectedTab === tab && styles.activeTab]}
-            >
-              {tab}
-            </Text>
+            <Text>{filter}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      <TextInput
-        placeholder="Search..."
-        value={search}
-        onChangeText={setSearch}
-        style={styles.search}
-      />
-
-      <TouchableOpacity
-        onPress={() => setOnlyVeg(prev => !prev)}
-        style={styles.vegToggle}
-      >
-        <Text>{onlyVeg ? 'Show All' : 'Show Veg Only'}</Text>
-      </TouchableOpacity>
-
       <FlatList
         data={filteredDishes}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <DishCard
-            dish={item}
-            count={selected[item.id] ? 1 : 0}
-            onAdd={() => handleAdd(item)}
-            onRemove={() => handleRemove(item)}
-          />
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.list}
+        renderItem={({ item:dish,item }) => (
+          <View style={styles.card}>
+            <Image source={{ uri: dish.image || '' }} style={styles.image} />
+            <View style={{ flex: 1, paddingHorizontal: 10 }}>
+              <Text style={styles.dishName}>{item.name}</Text>
+              <Text style={styles.dishDesc}>{item.description}</Text>
+              <View style={styles.actions}>
+                <TouchableOpacity onPress={() => handleRemove(item.id)} style={styles.actionBtn}>
+                  <Text>➖</Text>
+                </TouchableOpacity>
+                <Text>{cartQuantities[item.id] || 0}</Text>
+                <TouchableOpacity onPress={() => handleAdd(item.id)} style={styles.actionBtn}>
+                  <Text>➕</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('IngredientScreen', { dish: item })}
+                  style={[styles.actionBtn, { marginLeft: 12 }]}
+                >
+                  <Text>Ingredients</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         )}
       />
 
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate('SummaryScreen', {
-            selectedDishes: Object.entries(selected),
-          })
-        }
-        style={styles.continue}
-      >
-        <Text style={{ color: 'white' }}>
-          Continue ({Object.keys(selected).length})
+      <View style={styles.cartPrompt}>
+        <Text>
+          🛒 {Object.values(cartQuantities).reduce((a, b) => a + b, 0)} items in cart
         </Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+          <Text style={{ color: 'white' }}>Continue</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
+export default MenuScreen;
+
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', paddingHorizontal: 10 },
-  tab: { marginRight: 15 },
-  tabText: { fontSize: 16, color: '#555' },
-  activeTab: { color: '#000', fontWeight: 'bold' },
-  search: {
-    margin: 10,
-    padding: 8,
-    borderColor: '#ccc',
+  container: { flex: 1, padding: 10 },
+  searchInput: {
     borderWidth: 1,
-    borderRadius: 6,
+    borderColor: '#ccc',
+    borderRadius: 12,
+    padding: 8,
+    marginBottom: 10,
   },
-  vegToggle: { alignItems: 'center', marginBottom: 10 },
-  continue: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: '#000',
-    padding: 15,
+  toggleContainer: { flexDirection: 'row', gap: 10, marginBottom: 10 },
+  toggleButton: {
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: '#eee',
+  },
+  vegButton: { backgroundColor: '#d0f0d0' },
+  nonVegButton: { backgroundColor: '#fcdada' },
+  filterRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
+  filterButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 10,
+    backgroundColor: '#eee',
+  },
+  selectedFilterButton: { backgroundColor: '#ddd' },
+  list: { paddingBottom: 100 },
+  card: {
+    flexDirection: 'row',
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#fafafa',
+    marginBottom: 10,
     alignItems: 'center',
   },
+  image: { width: 80, height: 80, borderRadius: 10 },
+  dishName: { fontWeight: 'bold', fontSize: 16 },
+  dishDesc: { color: '#666', fontSize: 13 },
+  actions: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
+  actionBtn: {
+    padding: 6,
+    backgroundColor: '#eee',
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  cartPrompt: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    right: 10,
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    elevation: 5,
+  },
+  continueButton: {
+    backgroundColor: '#007bff',
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
 });
-
-export default MenuScreen;
