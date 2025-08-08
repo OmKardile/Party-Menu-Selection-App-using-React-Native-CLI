@@ -1,80 +1,85 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  StyleSheet,
   FlatList,
   Image,
-  StyleSheet,
-  ScrollView,
+  TouchableOpacity,
+  Pressable
 } from 'react-native';
-import sampleData from '../data/sample.json';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
 import { Dish } from '../types/dish';
+import sampleData from '../data/sample.json';
 
-const mealTypes = ['Starter', 'Main Course', 'Dessert', 'Sides'];
+const mealTypes = ['Starter', 'Main Course', 'Dessert', 'Sides'] as const;
+const vegFilterOptions = ['All', 'Veg', 'Non-Veg'] as const;
+
+type VegFilter = typeof vegFilterOptions[number];
 
 const MenuScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isVegOnly, setIsVegOnly] = useState(false);
-  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
-  const [dishes, setDishes] = useState<Dish[]>([]);
-  const [cartQuantities, setCartQuantities] = useState<{ [id: number]: number }>({});
+  const navigation = useNavigation();
+  const [search, setSearch] = useState('');
+  const [selectedMealType, setSelectedMealType] = useState<string>('All');
+  const [vegFilter, setVegFilter] = useState<VegFilter>('All');
+  const [selectedDishes, setSelectedDishes] = useState<Dish[]>([]);
 
-  useEffect(() => {
-    const dishList: Dish[] = sampleData; 
-    setDishes(dishList);
-  }, []);
-
-  const toggleVeg = () => setIsVegOnly((prev) => !prev);
-
-  const filteredDishes = dishes.filter((dish) => {
-    const matchesSearch = dish.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesVeg = !isVegOnly || dish.veg;
-    const matchesMealType = !selectedMealType || dish.mealType === selectedMealType;
-    return matchesSearch && matchesVeg && matchesMealType;
+  const filteredDishes = sampleData.filter((dish: Dish) => {
+    const matchSearch = dish.name.toLowerCase().includes(search.toLowerCase());
+    const matchMealType =
+      selectedMealType === 'All' || dish.mealType === selectedMealType;
+    const matchVeg =
+      vegFilter === 'All' ||
+      (vegFilter === 'Veg' && dish.type === 'Veg') ||
+      (vegFilter === 'Non-Veg' && dish.type === 'Non-Veg');
+    return matchSearch && matchMealType && matchVeg;
   });
 
-  const updateQuantity = (dishId: number, change: number) => {
-    setCartQuantities((prev) => {
-      const current = prev[dishId] || 0;
-      const updated = Math.max(0, current + change);
-      return { ...prev, [dishId]: updated };
-    });
+  const toggleDishSelection = (dish: Dish) => {
+    if (selectedDishes.find(d => d.name === dish.name)) {
+      setSelectedDishes(prev => prev.filter(d => d.name !== dish.name));
+    } else {
+      setSelectedDishes(prev => [...prev, dish]);
+    }
   };
 
-  const selectedDishes = dishes.filter((dish) => cartQuantities[dish.id] > 0);
-
-  const handleContinue = () => {
-    navigation.navigate('SummaryScreen', {
-      selectedDishes,
-      cartQuantities,
-    });
+  const navigateToSummary = () => {
+    navigation.navigate('SummaryScreen', { selectedDishes });
   };
 
-  const renderDish = ({ item }: { item: Dish }) => (
+  const navigateToIngredients = (dish: Dish) => {
+    navigation.navigate('IngredientScreen', { dish });
+  };
+
+  const isSelected = (dish: Dish) =>
+    selectedDishes.some(d => d.name === dish.name);
+
+  const renderDishCard = ({ item }: { item: Dish }) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.image || '' }} style={styles.image} />
-      <View style={styles.cardContent}>
-        <Text style={styles.dishName}>{item.name}</Text>
+      <Image
+        source={{ uri: item.image || '' }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+      <View style={styles.details}>
+        <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.description}>{item.description}</Text>
-        <View style={styles.cardActions}>
-          <TouchableOpacity onPress={() => updateQuantity(item.id, -1)} style={styles.quantityButton}>
-            <Text style={styles.quantityButtonText}>-</Text>
-          </TouchableOpacity>
-          <Text style={styles.quantityText}>{cartQuantities[item.id] || 0}</Text>
-          <TouchableOpacity onPress={() => updateQuantity(item.id, 1)} style={styles.quantityButton}>
-            <Text style={styles.quantityButtonText}>+</Text>
+        <Text style={styles.type}>{item.type}</Text>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.ingredientButton}
+            onPress={() => navigateToIngredients(item)}
+          >
+            <Text style={styles.buttonText}>View Ingredients</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => navigation.navigate('IngredientScreen', { dish: item })}
-            style={styles.ingredientButton}
+            style={styles.selectButton}
+            onPress={() => toggleDishSelection(item)}
           >
-            <Text style={styles.ingredientButtonText}>Ingredients</Text>
+            <Text style={styles.buttonText}>
+              {isSelected(item) ? 'Remove' : 'Add'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -83,64 +88,71 @@ const MenuScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
       <TextInput
-        style={styles.searchBar}
+        style={styles.search}
         placeholder="Search dishes..."
-        value={searchQuery}
-        onChangeText={setSearchQuery}
+        value={search}
+        onChangeText={setSearch}
       />
 
-      {/* Veg / Non-Veg Toggle */}
-      <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>Veg Only</Text>
-        <TouchableOpacity
-          onPress={toggleVeg}
-          style={[
-            styles.toggleButton,
-            { backgroundColor: isVegOnly ? 'green' : 'red' },
-          ]}
-        >
-          <Text style={styles.toggleText}>{isVegOnly ? 'On' : 'Off'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Meal Type Filters */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-        {mealTypes.map((type) => (
-          <TouchableOpacity
-            key={type}
+      <View style={styles.toggleBox}>
+        {vegFilterOptions.map(option => (
+          <Pressable
+            key={option}
             style={[
-              styles.filterButton,
-              selectedMealType === type && styles.filterButtonActive,
+              styles.toggleOption,
+              vegFilter === option && styles.toggleOptionSelected
             ]}
-            onPress={() => setSelectedMealType(selectedMealType === type ? null : type)}
+            onPress={() => setVegFilter(option)}
           >
             <Text
               style={[
-                styles.filterText,
-                selectedMealType === type && styles.filterTextActive,
+                styles.toggleText,
+                vegFilter === option && styles.toggleTextSelected
               ]}
             >
-              {type}
+              {option}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={styles.filterRow}>
+        <TouchableOpacity onPress={() => setSelectedMealType('All')}>
+          <Text
+            style={[
+              styles.filterButton,
+              selectedMealType === 'All' && styles.selectedFilter
+            ]}
+          >
+            All
+          </Text>
+        </TouchableOpacity>
+        {mealTypes.map(meal => (
+          <TouchableOpacity key={meal} onPress={() => setSelectedMealType(meal)}>
+            <Text
+              style={[
+                styles.filterButton,
+                selectedMealType === meal && styles.selectedFilter
+              ]}
+            >
+              {meal}
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
-      {/* Dish List */}
       <FlatList
         data={filteredDishes}
-        renderItem={renderDish}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
+        keyExtractor={(item, index) => item.name + index}
+        renderItem={renderDishCard}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      {/* Continue Button */}
       {selectedDishes.length > 0 && (
-        <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+        <TouchableOpacity style={styles.continueButton} onPress={navigateToSummary}>
           <Text style={styles.continueText}>
-            Continue ({selectedDishes.length} item{selectedDishes.length > 1 ? 's' : ''})
+            Continue ({selectedDishes.length} items)
           </Text>
         </TouchableOpacity>
       )}
@@ -148,130 +160,127 @@ const MenuScreen = () => {
   );
 };
 
-export default MenuScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 10,
+    padding: 12,
+    backgroundColor: '#fafafa'
   },
-  searchBar: {
+  search: {
     height: 40,
-    backgroundColor: '#f1f1f1',
-    borderRadius: 8,
+    backgroundColor: '#fff',
     paddingHorizontal: 12,
+    borderRadius: 8,
     marginBottom: 10,
+    borderColor: '#ddd',
+    borderWidth: 1
   },
-  toggleRow: {
+  toggleBox: {
     flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: '#eaeaea',
+    borderRadius: 8,
     marginBottom: 10,
+    overflow: 'hidden'
   },
-  toggleLabel: {
-    fontSize: 16,
-    marginRight: 10,
-  },
-  toggleButton: {
-    padding: 8,
-    borderRadius: 20,
-    width: 60,
+  toggleOption: {
+    flex: 1,
+    paddingVertical: 8,
     alignItems: 'center',
+    backgroundColor: '#eaeaea'
+  },
+  toggleOptionSelected: {
+    backgroundColor: '#d0f0d0'
   },
   toggleText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#333'
   },
-  filterScroll: {
+  toggleTextSelected: {
+    fontWeight: 'bold',
+    color: '#007700'
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 10,
+    gap: 8
   },
   filterButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
     backgroundColor: '#eee',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 20,
-    marginRight: 10,
+    marginRight: 8
   },
-  filterButtonActive: {
-    backgroundColor: '#007bff',
-  },
-  filterText: {
-    color: '#333',
-  },
-  filterTextActive: {
-    color: '#fff',
-  },
-  list: {
-    paddingBottom: 80,
+  selectedFilter: {
+    backgroundColor: '#d0e8ff',
+    fontWeight: 'bold'
   },
   card: {
-    backgroundColor: '#fafafa',
+    flexDirection: 'row',
+    backgroundColor: '#fff',
     borderRadius: 10,
-    marginBottom: 12,
+    marginBottom: 10,
     overflow: 'hidden',
-    elevation: 2,
+    elevation: 2
   },
   image: {
-    width: '100%',
-    height: 150,
+    width: 90,
+    height: 90
   },
-  cardContent: {
-    padding: 10,
+  details: {
+    flex: 1,
+    padding: 10
   },
-  dishName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  name: {
+    fontSize: 16,
+    fontWeight: '600'
   },
   description: {
-    fontSize: 14,
-    color: '#666',
-    marginVertical: 4,
+    fontSize: 12,
+    color: '#555'
   },
-  cardActions: {
+  type: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 4
+  },
+  buttonRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  quantityButton: {
-    backgroundColor: '#ccc',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    marginHorizontal: 5,
-  },
-  quantityButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  quantityText: {
-    fontSize: 16,
-    minWidth: 20,
-    textAlign: 'center',
+    marginTop: 6,
+    justifyContent: 'space-between'
   },
   ingredientButton: {
-    marginLeft: 'auto',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#007bff',
-    borderRadius: 6,
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6
   },
-  ingredientButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  selectButton: {
+    backgroundColor: '#d0f0d0',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6
+  },
+  buttonText: {
+    fontSize: 12,
+    color: '#333'
   },
   continueButton: {
     position: 'absolute',
-    bottom: 15,
+    bottom: 20,
     left: 20,
     right: 20,
-    backgroundColor: '#007bff',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
+    backgroundColor: '#007700',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center'
   },
   continueText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
-  },
+    fontSize: 16
+  }
 });
+
+export default MenuScreen;
